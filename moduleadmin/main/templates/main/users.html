@@ -1,0 +1,15 @@
+{% extends "main/base.html" %}
+{% block title %}View List {% endblock %}
+{% block content %}
+<h1>{{ls.name}}</h1>
+<form method="post" action="#">
+{% csrf_token %}
+<ul>
+{% for item in ls.all %}
+    <li><label>{{item.id}} {{item.name}} {{item.last_name}} {{item.role}}</label></li>
+{% endfor %}
+</ul>
+<button class="btn btn-success" type="submit" name="edit" value="save">Edit</button>
+<button class="btn btn-success" type="submit" name="newItem" value="newItem">New Item</button>
+</form>
+{% endblock %}
