@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404, render
-from django.http import HttpResponse, HttpResponseRedirect
-from .models import User
-from .forms import CreateNewUser, UpdateNewUser
+from django.http import HttpResponse, HttpResponseRedirect, Http404
+from .models import Usuario
+from .forms import CreateNewUser, UpdateUser
 
 # Create your views here.
 
@@ -10,11 +10,11 @@ def index(request):
     return render(request, "main/home.html",{})
 
 def users(request):
-    ls = User.objects.all()
+    ls = Usuario.objects.all()
     return render(request, "main/users.html",{"ls":ls})
 
 def usersById(request, id):
-    ls = User.objects.get(id=id)
+    ls = Usuario.objects.get(id=id)
     if request.method == "POST":
         print(request.POST)
         if request.POST.get("edit"):
@@ -41,7 +41,7 @@ def create(request):
             n = form.cleaned_data["name"]
             ln = form.cleaned_data["last_name"]
             r = form.cleaned_data["role"]
-            t = User(name=n,last_name=ln,role=r)
+            t = Usuario(name=n,last_name=ln,role=r)
             t.save()
             request.user.user.add(t)
             
@@ -52,18 +52,22 @@ def create(request):
     return render(request, "main/create.html",{"form":form})
 
 def update(request, id):
-    obj= User.objects.get(id=id)
+    
     if request.method == "POST":
-        form = UpdateNewUser(request.POST)
+        form = UpdateUser(request.POST)
         if form.is_valid():
             n = form.cleaned_data["name"]
             ln = form.cleaned_data["last_name"]
             r = form.cleaned_data["role"]
-            User.objects.filter(id=id).update(name=n,last_name=ln,role=r)
+            Usuario.objects.filter(id=id).update(name=n,last_name=ln,role=r)
             
         return HttpResponseRedirect("/%i" %id)
     else:
-        form = UpdateNewUser(request.POST or None, instance= obj)
+        try:
+            usuario=Usuario.objects.get(id=id)
+            form = UpdateUser(instance=usuario)
+        except Usuario.DoesNotExist:
+            raise Http404("User does not exist")
 
     return render(request, "main/update.html",{"form":form})
    
