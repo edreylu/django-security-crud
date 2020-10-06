@@ -1,7 +1,8 @@
 from django.shortcuts import get_object_or_404, render
-from django.http import HttpResponse, HttpResponseRedirect
-from .models import User
-from .forms import CreateNewUser, UpdateNewUser
+from django.http import HttpResponse, HttpResponseRedirect, Http404
+from .models import Usuario
+from .forms import CreateNewUser, UpdateUser
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 
@@ -9,12 +10,17 @@ from .forms import CreateNewUser, UpdateNewUser
 def index(request):
     return render(request, "main/home.html",{})
 
+@login_required
 def users(request):
-    ls = User.objects.all()
-    return render(request, "main/users.html",{"ls":ls})
+    context = {}
+    ls = Usuario.objects.all()
+    context["ls"] = ls
+    return render(request, "main/users/users.html",context)
 
+@login_required
 def usersById(request, id):
-    ls = User.objects.get(id=id)
+    context = {}
+    ls = Usuario.objects.get(id=id)
     if request.method == "POST":
         print(request.POST)
         if request.POST.get("edit"):
@@ -31,39 +37,52 @@ def usersById(request, id):
                 ls.item_set.create(text=txt, complete=False)
             else:
                 print("invalid")
+    context["ls"] = ls
+    return render(request, "main/users/users.html",context)
 
-    return render(request, "main/users.html",{"ls":ls})
-
+@login_required
 def create(request):
+    context = {}
     if request.method == "POST":
         form = CreateNewUser(request.POST)
         if form.is_valid():
             n = form.cleaned_data["name"]
             ln = form.cleaned_data["last_name"]
             r = form.cleaned_data["role"]
-            t = User(name=n,last_name=ln,role=r)
+            t = Usuario(name=n,last_name=ln,role=r)
             t.save()
-            request.user.user.add(t)
-            
-        return HttpResponseRedirect("/%i" %t.id)
+            return HttpResponseRedirect("/users/")
     else:
         form = CreateNewUser()
+    context["form"] = form
+    return render(request, "main/users/create.html",context)
 
-    return render(request, "main/create.html",{"form":form})
-
+@login_required
 def update(request, id):
-    obj= User.objects.get(id=id)
+    context = {}
     if request.method == "POST":
-        form = UpdateNewUser(request.POST)
+        form = UpdateUser(request.POST)
         if form.is_valid():
             n = form.cleaned_data["name"]
             ln = form.cleaned_data["last_name"]
             r = form.cleaned_data["role"]
-            User.objects.filter(id=id).update(name=n,last_name=ln,role=r)
-            
-        return HttpResponseRedirect("/%i" %id)
+            Usuario.objects.filter(id=id).update(name=n,last_name=ln,role=r)
+            return HttpResponseRedirect("/users/")
     else:
-        form = UpdateNewUser(request.POST or None, instance= obj)
+        try:
+            usuario=Usuario.objects.get(id=id)
+            form = UpdateUser(instance=usuario)
+        except Usuario.DoesNotExist:
+            raise Http404("User does not exist")
+    context["form"] = form;
+    return render(request, "main/users/update.html",context)
 
-    return render(request, "main/update.html",{"form":form})
-   
+@login_required
+def delete(request, id):
+    usuarioExists=Usuario.objects.filter(id=id).exists()
+    if usuarioExists:
+        Usuario.objects.filter(id=id).delete()
+    else:
+        return HttpResponseRedirect("/users/1")
+    
+    return HttpResponseRedirect("/users/")

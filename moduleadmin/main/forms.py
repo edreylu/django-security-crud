@@ -1,12 +1,42 @@
 from django import forms
-from .models import Role
+from .models import Role, Usuario
 
-class CreateNewUser(forms.Form):
-    name = forms.CharField(label="Name", max_length=200)
-    last_name = forms.CharField(label="LastName",max_length=200)
-    role = forms.models.ModelChoiceField(label="Role",queryset=Role.objects)
 
-class UpdateNewUser(forms.Form):
-    name = forms.CharField(label="Name", max_length=200)
-    last_name = forms.CharField(label="LastName",max_length=200)
-    role = forms.models.ModelChoiceField(label="Role",queryset=Role.objects)
+class CreateNewUser(forms.ModelForm):
+    class Meta:
+        model = Usuario
+        fields = ['name', 'last_name', 'role', 'user']
+        error_messages = {
+            'name': {
+                'required': "Name es requerido",
+            },
+            'last_name': {
+                'required': "Last name es requerido",
+            },
+            'role': {
+                'required': "Role es requerido",
+            },
+            'user': {
+                'required': "User es requerido",
+            },
+        }
+
+
+class UpdateUser(forms.ModelForm):
+    class Meta:
+        model = Usuario
+        fields = ['name', 'last_name', 'role', 'user']
+        error_messages = {
+            'name': {
+                'required': "Name es requerido",
+            },
+            'last_name': {
+                'required': "Last name es requerido",
+            },
+            'role': {
+                'required': "Role es requerido",
+            },
+            'user': {
+                'required': "User es requerido",
+            },
+        }
