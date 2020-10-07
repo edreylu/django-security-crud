@@ -3,6 +3,10 @@ from django.http import HttpResponse, HttpResponseRedirect, Http404
 from .models import Usuario
 from .forms import CreateNewUser, UpdateUser
 from django.contrib.auth.decorators import login_required
+<<<<<<< HEAD
+=======
+from django.contrib import messages
+>>>>>>> e9f5bc95fd57b4fc8eb7a8addbd539bf9a9dd371
 
 # Create your views here.
 
@@ -49,8 +53,10 @@ def create(request):
             n = form.cleaned_data["name"]
             ln = form.cleaned_data["last_name"]
             r = form.cleaned_data["role"]
-            t = Usuario(name=n,last_name=ln,role=r)
+            u = form.cleaned_data["user"]
+            t = Usuario(name=n,last_name=ln,role=r,user=u)
             t.save()
+            messages.success(request, 'El registro fue creado.')
             return HttpResponseRedirect("/users/")
     else:
         form = CreateNewUser()
@@ -66,7 +72,13 @@ def update(request, id):
             n = form.cleaned_data["name"]
             ln = form.cleaned_data["last_name"]
             r = form.cleaned_data["role"]
+<<<<<<< HEAD
             Usuario.objects.filter(id=id).update(name=n,last_name=ln,role=r)
+=======
+            u = form.cleaned_data["user"]
+            Usuario.objects.filter(id=id).update(name=n,last_name=ln,role=r,user=u)
+            messages.success(request, 'El registro fue actualizado.')
+>>>>>>> e9f5bc95fd57b4fc8eb7a8addbd539bf9a9dd371
             return HttpResponseRedirect("/users/")
     else:
         try:
@@ -74,7 +86,11 @@ def update(request, id):
             form = UpdateUser(instance=usuario)
         except Usuario.DoesNotExist:
             raise Http404("User does not exist")
+<<<<<<< HEAD
     context["form"] = form;
+=======
+    context["form"] = form
+>>>>>>> e9f5bc95fd57b4fc8eb7a8addbd539bf9a9dd371
     return render(request, "main/users/update.html",context)
 
 @login_required
