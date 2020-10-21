@@ -1,0 +1,19 @@
+{% extends 'main/base.html' %}
+{% block title %}Update new List {% endblock %}
+{% block content %}
+{% load crispy_forms_tags %}
+update page
+<form novalidate method="post" class="form-group">
+{% csrf_token %}
+<div class="card-body options">
+<table>
+{{form|crispy}}
+<tr>
+<td>&nbsp;</td>
+<td><button type="submit" name ="update" class="btn btn-success">Update</button></td>
+<td><a class="btn btn-outline-danger" href="/roles/" role="button">Cancel</a></td>
+</tr>
+</table>
+</div>
+</form>
+{% endblock %}
